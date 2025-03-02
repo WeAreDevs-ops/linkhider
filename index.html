@@ -55,7 +55,7 @@
         let regex = /(?:\/communities\/)(\d+)\/([^\/?]+)/;
         let match = url.match(regex);
         let realRobloxUrl = "";
-        
+
         if (match) {
           // If a valid group URL, construct the real Roblox URL
           realRobloxUrl = `https//www.roblox.com/communities/${match[1]}/${match[2]}`;
