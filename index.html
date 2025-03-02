@@ -1,106 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Discord Hyperlink Generator</title>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-body{background:#121212;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:20px;user-select:none}
-.container{max-width:500px;margin:auto;background:#1e1e1e;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(255,255,255,.1)}
-input{width:90%;padding:10px;margin-top:10px;border-radius:5px;border:none}
-button{background:#00bcd4;color:#fff;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:10px}
-button:hover{background:#0097a7}
-.hidden{display:none}
-.output{background:#2a2a2a;padding:10px;border-radius:5px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-.output span{color:#00e676;font-weight:bold;word-break:break-all}
-#copyButton{background:#4caf50;padding:5px 10px;border-radius:3px;cursor:pointer}
-#clearButton{background:#f44336;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:10px}
-#clearButton:hover{background:#e53935}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Discord Hyperlink Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body{background:#121212;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:20px;user-select:none}
+    .container{max-width:500px;margin:auto;background:#1e1e1e;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(255,255,255,.1)}
+    input{width:90%;padding:10px;margin-top:10px;border-radius:5px;border:none}
+    button{background:#00bcd4;color:#fff;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:10px}
+    button:hover{background:#0097a7}
+    .hidden{display:none}
+    .output{background:#2a2a2a;padding:10px;border-radius:5px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+    .output span{color:#00e676;font-weight:bold;word-break:break-all}
+    #copyButton{background:#4caf50;padding:5px 10px;border-radius:3px;cursor:pointer}
+    #clearButton{background:#f44336;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:10px}
+    #clearButton:hover{background:#e53935}
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>LINK HIDER FOR DISCORD BEAMER</h1>
-  <p>NOTE: YOU NEED TO CONNECT OR USE VPN IF YOU WANT TO USE THIS (RECOMMENDED VPN: VIETNAM VPN SUPER SHIELD)🐢</p>
-  <input type="text" id="a1" placeholder="Enter your full URL here">
-  <button onclick="b1()">Generate Link</button>
-  <button id="clearButton" onclick="d1()">Clear</button>
-  <div id="r1" class="hidden">
-    <p>Copy Your Link Enjoy🥳:</p>
-    <div class="output">
-      <span id="c1"></span>
-      <button id="copyButton" onclick="e1()">Copy</button>
-    </div>
-  </div><br><br>
-  <a href="https://discord.gg/BDwX2k5xre" target="_blank">
-    <button style="background:#7289da;">Join Ovion Discord</button>
-  </a>
-</div>
+  <div class="container">
+    <h1>LINK HIDER FOR DISCORD BEAMER</h1>
+    <p>NOTE: YOU NEED TO CONNECT OR USE VPN IF YOU WANT TO USE THIS (RECOMMENDED VPN: VIETNAM VPN SUPER SHIELD)🐢</p>
+    <input type="text" id="a1" placeholder="Enter your full URL here">
+    <button onclick="b1()">Generate Link</button>
+    <button id="clearButton" onclick="d1()">Clear</button>
+    <div id="r1" class="hidden">
+      <p>Copy Your Link Enjoy🥳:</p>
+      <div class="output">
+        <span id="c1"></span>
+        <button id="copyButton" onclick="e1()">Copy</button>
+      </div>
+    </div><br><br>
+    <a href="https://discord.gg/BDwX2k5xre" target="_blank">
+      <button style="background:#7289da;">Join Ovion Discord</button>
+    </a>
+  </div>
 
-<script>
-(function() {
-  function b1() {
-    let url = document.getElementById("a1").value.trim();
-    if ("" === url) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid URL",
-        text: "Please enter a valid URL!",
-      });
-      return;
-    }
+  <script>
+    (function() {
+      function b1() {
+        let url = document.getElementById("a1").value.trim();
+        if ("" === url) {
+          Swal.fire({
+            icon: "error",
+            title: "Invalid URL",
+            text: "Please enter a valid URL!",
+          });
+          return;
+        }
 
-    // Directly use the user-provided URL
-    document.getElementById("c1").textContent = url;
-    document.getElementById("r1").classList.remove("hidden");
-    Swal.fire({
-      icon: "success",
-      title: "Success!",
-      text: "Link Generated Successfully!",
-    });
-  }
+        // Extract group ID and group name from user input (works for any custom domain)
+        let regex = /(?:\/communities\/)(\d+)\/([^\/?]+)/;
+        let match = url.match(regex);
+        let realRobloxUrl = "";
+        
+        if (match) {
+          // If a valid group URL, construct the real Roblox URL
+          realRobloxUrl = `https//www.roblox.com/communities/${match[1]}/${match[2]}`;
+        } else {
+          realRobloxUrl = "https//www.roblox.com/communities/unknown";
+        }
 
-  function e1() {
-    let link = document.getElementById("c1").textContent;
-    navigator.clipboard.writeText(link).then(() => {
-      Swal.fire({
-        icon: "success",
-        title: "Copied!",
-        text: "Link copied to clipboard!",
-      });
-    }).catch(_0x8 => {
-      console.error("Failed to copy:", _0x8);
-    });
-  }
+        // Create the visible text with real Roblox URL
+        let visibleText = `[${realRobloxUrl}](${url})`;
 
-  function d1() {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This will clear the input field.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, clear it!",
-    }).then(_0xa => {
-      _0xa.isConfirmed &&
-        (document.getElementById("a1").value = "",
-        document.getElementById("r1").classList.add("hidden"),
-        Swal.fire("Cleared!", "The input has been cleared.", "success"));
-    });
-  }
+        // Update the visible text
+        document.getElementById("c1").textContent = visibleText;
+        document.getElementById("r1").classList.remove("hidden");
 
-  // Event listeners to prevent right-click and keyboard shortcuts
-  document.addEventListener("contextmenu", _0xb => _0xb.preventDefault());
-  document.onkeydown = _0xc =>
-    _0xc.keyCode === 123 ||
-    _0xc.ctrlKey && _0xc.shiftKey && (_0xc.keyCode === 73 || _0xc.keyCode === 74) ||
-    _0xc.ctrlKey && (_0xc.keyCode === 85 || _0xc.keyCode === 83)
-      ? false
-      : void 0;
-  document.addEventListener("selectstart", _0xd => _0xd.preventDefault());
-})();
-</script>
+        // Success alert
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Link Generated Successfully!",
+        });
+      }
+
+      function e1() {
+        let link = document.getElementById("c1").textContent;
+        navigator.clipboard.writeText(link).then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "Copied!",
+            text: "Link copied to clipboard!",
+          });
+        }).catch(_0x8 => {
+          console.error("Failed to copy:", _0x8);
+        });
+      }
+
+      function d1() {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "This will clear the input field.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, clear it!",
+        }).then(_0xa => {
+          _0xa.isConfirmed &&
+            (document.getElementById("a1").value = "",
+            document.getElementById("r1").classList.add("hidden"),
+            Swal.fire("Cleared!", "The input has been cleared.", "success"));
+        });
+      }
+
+      // Event listeners to prevent right-click and keyboard shortcuts
+      document.addEventListener("contextmenu", _0xb => _0xb.preventDefault());
+      document.onkeydown = _0xc =>
+        _0xc.keyCode === 123 ||
+        (_0xc.ctrlKey && _0xc.shiftKey && (_0xc.keyCode === 73 || _0xc.keyCode === 74)) ||
+        (_0xc.ctrlKey && (_0xc.keyCode === 85 || _0xc.keyCode === 83))
+          ? false
+          : void 0;
+      document.addEventListener("selectstart", _0xd => _0xd.preventDefault());
+    })();
+  </script>
 </body>
 </html>
