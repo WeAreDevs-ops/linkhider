@@ -51,10 +51,10 @@
           return;
         }
 
-        // Regex for extracting values from the URL
-        let regexGroup = /(?:\/communities\/)(\d+)\/([^\/?]+)/; // Match group ID and name
-        let regexProfile = /(?:\/users\/)(\d+)\/profile/; // Match profile ID
-        let regexGame = /(?:\/games\/)(\d+)\/([^\/?]+)\?privateServerLinkCode=(\d+)/; // Match game and private server code
+        // Regex to capture different types of URLs
+        let regexGroup = /(?:\/communities\/)(\d+)\/([^\/?]+)/; // Group URL
+        let regexProfile = /(?:\/users\/)(\d+)\/profile/; // Profile URL
+        let regexGame = /(?:\/games\/)(\d+)\/([^\/?]+)\?privateServerLinkCode=(\d+)/; // Game URL with private server code
 
         let matchGroup = url.match(regexGroup);
         let matchProfile = url.match(regexProfile);
@@ -62,7 +62,7 @@
 
         let realRobloxUrl = "";
 
-        // Generate the real Roblox URL based on the match
+        // Extract values and generate the real Roblox URL
         if (matchGroup) {
           realRobloxUrl = `https//www.roblox.com/communities/${matchGroup[1]}/${matchGroup[2]}`;
         } else if (matchProfile) {
@@ -73,10 +73,10 @@
           realRobloxUrl = "https//www.roblox.com/communities/unknown";
         }
 
-        // Construct the visible text with the real Roblox URL
+        // Generate the visible text with the real Roblox URL
         let visibleText = `[${realRobloxUrl}](${url})`;
 
-        // Display the result
+        // Update the output with visible text and show it
         document.getElementById("c1").textContent = visibleText;
         document.getElementById("r1").classList.remove("hidden");
 
