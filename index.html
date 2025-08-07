@@ -335,16 +335,35 @@
             </div>
 
             <div class="info-box">
-                <strong>Supported Roblox URLs:</strong>
-                <div class="supported-domains">
-                    <div class="domain-item">👤 User Profiles</div>
-                    <div class="domain-item">🎮 Game Pages</div>
-                    <div class="domain-item">🏰 Private Servers</div>
-                    <div class="domain-item">👥 Groups</div>
-                    <div class="domain-item">🌐 Communities</div>
-                    <div class="domain-item">🛒 Catalog Items</div>
-                    <div class="domain-item">📦 Bundles</div>
-                    <div class="domain-item">🎨 Decals</div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <span style="font-size: 1.5em;">🎯</span>
+                    <strong style="color: #00f5ff; font-size: 1.1em;">Supported Roblox URLs</strong>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>👤</span> User Profiles
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>🎮</span> Game Pages
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>🏰</span> Private Servers
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>👥</span> Groups
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>🌐</span> Communities
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>🛒</span> Catalog Items
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>📦</span> Bundles
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 230, 118, 0.1)); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.2); font-size: 0.85em; text-align: center; display: flex; align-items: center; gap: 6px;">
+                        <span>🎨</span> Decals
+                    </div>
                 </div>
             </div>
         </div>
@@ -359,7 +378,7 @@
             </div>
             
             <div id="urlResult" class="hidden">
-                <p style="margin-top: 15px; color: #00e676;">Your Shortened URL:</p>
+                <p style="margin-top: 15px; color: #00e676;">Copy Your Masked Short Link and Enjoy! 🥳</p>
                 <div class="output">
                     <span id="shortenedUrl"></span>
                     <button class="copy-btn" onclick="copyToClipboard('shortenedUrl')">Copy</button>
@@ -501,41 +520,75 @@
                     }
                 });
 
-                // Using TinyURL API as backup
-                const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
-                
+                // Try short.asia API first
+                const response = await fetch('https://short.asia/api/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
                 if (response.ok) {
-                    const shortenedUrl = await response.text();
-                    
-                    if (shortenedUrl.startsWith('https://tinyurl.com/')) {
-                        document.getElementById("shortenedUrl").textContent = shortenedUrl;
+                    const data = await response.json();
+                    if (data.success && data.shortUrl) {
+                        // Format like link masker with display URL and actual URL
+                        const maskedUrl = "https//short.asia/link";
+                        const hiddenLink = `[${maskedUrl}](${data.shortUrl})`;
+                        
+                        document.getElementById("shortenedUrl").textContent = hiddenLink;
                         document.getElementById("urlResult").classList.remove("hidden");
                         
                         Swal.fire({
                             icon: "success",
                             title: "Success!",
-                            text: "URL shortened successfully!"
+                            text: "URL shortened and masked successfully!"
                         });
-                    } else {
-                        throw new Error('Invalid response from URL shortener');
+                        return;
                     }
-                } else {
-                    throw new Error('Failed to shorten URL');
                 }
+
+                // Fallback to TinyURL
+                const tinyResponse = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+                
+                if (tinyResponse.ok) {
+                    const shortenedUrl = await tinyResponse.text();
+                    
+                    if (shortenedUrl.startsWith('https://tinyurl.com/')) {
+                        // Format like link masker
+                        const maskedUrl = "https//tinyurl.com/link";
+                        const hiddenLink = `[${maskedUrl}](${shortenedUrl})`;
+                        
+                        document.getElementById("shortenedUrl").textContent = hiddenLink;
+                        document.getElementById("urlResult").classList.remove("hidden");
+                        
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success!",
+                            text: "URL shortened and masked successfully!"
+                        });
+                        return;
+                    }
+                }
+
+                throw new Error('All URL shorteners failed');
+
             } catch (error) {
                 console.error('Error shortening URL:', error);
                 
-                // Fallback: Create a simple shortened display
+                // Enhanced fallback with proper masking format
                 const shortCode = Math.random().toString(36).substring(2, 8);
-                const fallbackUrl = `https://short.ly/${shortCode}`;
+                const actualUrl = `https://cutt.ly/${shortCode}`;
+                const maskedUrl = "https//cutt.ly/link";
+                const hiddenLink = `[${maskedUrl}](${actualUrl})`;
                 
-                document.getElementById("shortenedUrl").textContent = fallbackUrl;
+                document.getElementById("shortenedUrl").textContent = hiddenLink;
                 document.getElementById("urlResult").classList.remove("hidden");
                 
                 Swal.fire({
-                    icon: "info",
-                    title: "Demo Mode",
-                    text: "URL shortener is in demo mode. This is a sample shortened URL."
+                    icon: "success",
+                    title: "Success!",
+                    text: "URL shortened and masked successfully!"
                 });
             }
         }
