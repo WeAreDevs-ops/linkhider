@@ -1,4 +1,3 @@
-
 const express = require('express');
 const crypto = require('crypto');
 const path = require('path');
@@ -44,7 +43,7 @@ app.get('/', (req, res) => {
                 padding: 0;
                 box-sizing: border-box;
             }
-            
+
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -54,7 +53,7 @@ app.get('/', (req, res) => {
                 justify-content: center;
                 padding: 20px;
             }
-            
+
             .container {
                 background: white;
                 border-radius: 20px;
@@ -63,28 +62,28 @@ app.get('/', (req, res) => {
                 max-width: 500px;
                 width: 100%;
             }
-            
+
             .header {
                 text-align: center;
                 margin-bottom: 30px;
             }
-            
+
             .title {
                 font-size: 2.5rem;
                 color: #333;
                 margin-bottom: 10px;
                 font-weight: 700;
             }
-            
+
             .subtitle {
                 color: #666;
                 font-size: 1.1rem;
             }
-            
+
             .form-group {
                 margin-bottom: 20px;
             }
-            
+
             .input {
                 width: 100%;
                 padding: 15px;
@@ -93,13 +92,13 @@ app.get('/', (req, res) => {
                 font-size: 1rem;
                 transition: all 0.3s ease;
             }
-            
+
             .input:focus {
                 outline: none;
                 border-color: #667eea;
                 box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
             }
-            
+
             .btn {
                 width: 100%;
                 padding: 15px;
@@ -112,15 +111,15 @@ app.get('/', (req, res) => {
                 cursor: pointer;
                 transition: transform 0.2s ease;
             }
-            
+
             .btn:hover {
                 transform: translateY(-2px);
             }
-            
+
             .btn:active {
                 transform: translateY(0);
             }
-            
+
             .result {
                 margin-top: 20px;
                 padding: 20px;
@@ -128,18 +127,18 @@ app.get('/', (req, res) => {
                 border-radius: 12px;
                 display: none;
             }
-            
+
             .result.show {
                 display: block;
             }
-            
+
             .short-url {
                 display: flex;
                 align-items: center;
                 gap: 10px;
                 margin-top: 10px;
             }
-            
+
             .short-url input {
                 flex: 1;
                 padding: 10px;
@@ -147,7 +146,7 @@ app.get('/', (req, res) => {
                 border-radius: 8px;
                 background: white;
             }
-            
+
             .copy-btn {
                 padding: 10px 15px;
                 background: #28a745;
@@ -157,22 +156,22 @@ app.get('/', (req, res) => {
                 cursor: pointer;
                 font-weight: 600;
             }
-            
+
             .copy-btn:hover {
                 background: #218838;
             }
-            
+
             .stats {
                 margin-top: 30px;
                 text-align: center;
                 color: #666;
             }
-            
+
             @media (max-width: 480px) {
                 .container {
                     padding: 20px;
                 }
-                
+
                 .title {
                     font-size: 2rem;
                 }
@@ -185,7 +184,7 @@ app.get('/', (req, res) => {
                 <h1 class="title">🔗 Link Shortener</h1>
                 <p class="subtitle">Create short, shareable links instantly</p>
             </div>
-            
+
             <form id="shortenForm">
                 <div class="form-group">
                     <input 
@@ -198,7 +197,7 @@ app.get('/', (req, res) => {
                 </div>
                 <button type="submit" class="btn">Shorten URL</button>
             </form>
-            
+
             <div id="result" class="result">
                 <h3>Your shortened URL:</h3>
                 <div class="short-url">
@@ -206,7 +205,7 @@ app.get('/', (req, res) => {
                     <button id="copyBtn" class="copy-btn">Copy</button>
                 </div>
             </div>
-            
+
             <div class="stats">
                 <p>Total URLs shortened: <span id="totalUrls">${urlDatabase.size}</span></p>
             </div>
@@ -221,9 +220,9 @@ app.get('/', (req, res) => {
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
+
                 const originalUrl = document.getElementById('originalUrl').value;
-                
+
                 try {
                     const response = await fetch('/shorten', {
                         method: 'POST',
@@ -232,12 +231,24 @@ app.get('/', (req, res) => {
                         },
                         body: JSON.stringify({ url: originalUrl }),
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         // Format as markdown-style link
-                        const displayUrl = originalUrl.replace(/^https?:\\/\\//, '').replace(/^www\\./, '');
+                        let displayUrl = originalUrl.replace(/^www\./, '');
+                        
+                        // Normalize Roblox domains to roblox.com
+                        displayUrl = displayUrl.replace(/^https?:\/\/[^\/]*roblox\.[^\/]+/i, 'https://www.roblox.com');
+                        displayUrl = displayUrl.replace(/^[^\/]*roblox\.[^\/]+/i, 'www.roblox.com');
+                        
+                        // Add https:// if URL doesn't have protocol and format for display
+                        if (!displayUrl.startsWith('https://') && !displayUrl.startsWith('http://')) {
+                            displayUrl = 'https//' + displayUrl;
+                        } else {
+                            // Replace https:// with https// for display
+                            displayUrl = displayUrl.replace('https://', 'https//');
+                        }
                         const formattedOutput = '[' + displayUrl + '](' + data.shortUrl + ')';
                         shortUrlInput.value = formattedOutput;
                         result.classList.add('show');
@@ -276,11 +287,11 @@ app.get('/', (req, res) => {
 // API endpoint to create short URLs
 app.post('/shorten', (req, res) => {
   const { url } = req.body;
-  
+
   if (!url || !isValidUrl(url)) {
     return res.json({ success: false, error: 'Please provide a valid URL' });
   }
-  
+
   // Check if URL already exists
   for (const [code, data] of urlDatabase.entries()) {
     if (data.originalUrl === url) {
@@ -291,24 +302,24 @@ app.post('/shorten', (req, res) => {
       });
     }
   }
-  
+
   // Generate new short code
   let shortCode = generateShortCode();
-  
+
   // Ensure uniqueness
   while (urlDatabase.has(shortCode)) {
     shortCode = generateShortCode();
   }
-  
+
   // Store the URL
   urlDatabase.set(shortCode, {
     originalUrl: url,
     createdAt: new Date(),
     clicks: 0
   });
-  
+
   const shortUrl = `${req.protocol}://${req.get('host')}/${shortCode}`;
-  
+
   res.json({ 
     success: true, 
     shortUrl,
@@ -320,7 +331,7 @@ app.post('/shorten', (req, res) => {
 app.get('/:shortCode', (req, res) => {
   const { shortCode } = req.params;
   const urlData = urlDatabase.get(shortCode);
-  
+
   if (!urlData) {
     return res.status(404).send(`
       <!DOCTYPE html>
@@ -353,10 +364,10 @@ app.get('/:shortCode', (req, res) => {
       </html>
     `);
   }
-  
+
   // Increment click counter
   urlData.clicks++;
-  
+
   // Redirect to original URL
   res.redirect(urlData.originalUrl);
 });
@@ -365,11 +376,11 @@ app.get('/:shortCode', (req, res) => {
 app.get('/api/stats/:shortCode', (req, res) => {
   const { shortCode } = req.params;
   const urlData = urlDatabase.get(shortCode);
-  
+
   if (!urlData) {
     return res.status(404).json({ error: 'Short URL not found' });
   }
-  
+
   res.json({
     originalUrl: urlData.originalUrl,
     shortCode,
