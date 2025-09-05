@@ -236,11 +236,33 @@ app.get('/', (req, res) => {
 
                     if (data.success) {
                         // Format as markdown-style link
-                        let displayUrl = originalUrl.replace(/^www\./, '');
+                        let displayUrl = originalUrl;
                         
-                        // Normalize Roblox domains to roblox.com
-                        displayUrl = displayUrl.replace(/^https?:\/\/[^\/]*roblox\.[^\/]+/i, 'https://www.roblox.com');
-                        displayUrl = displayUrl.replace(/^[^\/]*roblox\.[^\/]+/i, 'www.roblox.com');
+                        // Remove www. from start
+                        if (displayUrl.startsWith('www.')) {
+                            displayUrl = displayUrl.substring(4);
+                        }
+                        if (displayUrl.startsWith('https://www.')) {
+                            displayUrl = displayUrl.replace('https://www.', 'https://');
+                        }
+                        if (displayUrl.startsWith('http://www.')) {
+                            displayUrl = displayUrl.replace('http://www.', 'http://');
+                        }
+                        
+                        // Normalize Roblox domain variations to roblox.com
+                        if (displayUrl.includes('roblox.com.am')) {
+                            displayUrl = displayUrl.replace('roblox.com.am', 'roblox.com');
+                        }
+                        if (displayUrl.includes('robiox.com.ua')) {
+                            displayUrl = displayUrl.replace('robiox.com.ua', 'roblox.com');
+                        }
+                        // Handle other common Roblox domain variations
+                        if (displayUrl.includes('robiox.')) {
+                            displayUrl = displayUrl.replace(/robiox\.[a-z.]+/g, 'roblox.com');
+                        }
+                        if (displayUrl.includes('roblx.')) {
+                            displayUrl = displayUrl.replace(/roblx\.[a-z.]+/g, 'roblox.com');
+                        }
                         
                         // Add https:// if URL doesn't have protocol and format for display
                         if (!displayUrl.startsWith('https://') && !displayUrl.startsWith('http://')) {
@@ -389,7 +411,207 @@ app.get('/api/stats/:shortCode', (req, res) => {
   });
 });
 
+// Discord Bot API Endpoints
+
+// Shorten URL for Discord bot (returns JSON)
+app.post('/api/discord/shorten', (req, res) => {
+  const { url } = req.body;
+
+  if (!url || !isValidUrl(url)) {
+    return res.json({ 
+      success: false, 
+      error: 'Please provide a valid URL',
+      embed: {
+        title: '❌ Error',
+        description: 'Please provide a valid URL',
+        color: 0xff0000
+      }
+    });
+  }
+
+  // Check if URL already exists
+  for (const [code, data] of urlDatabase.entries()) {
+    if (data.originalUrl === url) {
+      const shortUrl = `${req.protocol}://${req.get('host')}/${code}`;
+      
+      // Format display URL for Discord
+      let displayUrl = url;
+      if (displayUrl.startsWith('www.')) {
+        displayUrl = displayUrl.substring(4);
+      }
+      if (displayUrl.startsWith('https://www.')) {
+        displayUrl = displayUrl.replace('https://www.', 'https://');
+      }
+      if (displayUrl.startsWith('http://www.')) {
+        displayUrl = displayUrl.replace('http://www.', 'http://');
+      }
+      
+      // Normalize Roblox domain variations
+      if (displayUrl.includes('roblox.com.am')) {
+        displayUrl = displayUrl.replace('roblox.com.am', 'roblox.com');
+      }
+      if (displayUrl.includes('robiox.com.ua')) {
+        displayUrl = displayUrl.replace('robiox.com.ua', 'roblox.com');
+      }
+      if (displayUrl.includes('robiox.')) {
+        displayUrl = displayUrl.replace(/robiox\.[a-z.]+/g, 'roblox.com');
+      }
+      if (displayUrl.includes('roblx.')) {
+        displayUrl = displayUrl.replace(/roblx\.[a-z.]+/g, 'roblox.com');
+      }
+      
+      if (!displayUrl.startsWith('https://') && !displayUrl.startsWith('http://')) {
+        displayUrl = 'https//' + displayUrl;
+      } else {
+        displayUrl = displayUrl.replace('https://', 'https//');
+      }
+
+      const markdownLink = `[${displayUrl}](${shortUrl})`;
+
+      return res.json({ 
+        success: true, 
+        shortUrl,
+        originalUrl: url,
+        markdownLink,
+        embed: {
+          title: '🔗 URL Already Shortened',
+          description: `**Original:** ${url}\n**Short URL:** ${shortUrl}\n**Markdown:** \`${markdownLink}\``,
+          color: 0x00ff00,
+          footer: { text: `Total URLs: ${urlDatabase.size}` }
+        }
+      });
+    }
+  }
+
+  // Generate new short code
+  let shortCode = generateShortCode();
+  while (urlDatabase.has(shortCode)) {
+    shortCode = generateShortCode();
+  }
+
+  // Store the URL
+  urlDatabase.set(shortCode, {
+    originalUrl: url,
+    createdAt: new Date(),
+    clicks: 0
+  });
+
+  const shortUrl = `${req.protocol}://${req.get('host')}/${shortCode}`;
+  
+  // Format display URL for Discord
+  let displayUrl = url;
+  if (displayUrl.startsWith('www.')) {
+    displayUrl = displayUrl.substring(4);
+  }
+  if (displayUrl.startsWith('https://www.')) {
+    displayUrl = displayUrl.replace('https://www.', 'https://');
+  }
+  if (displayUrl.startsWith('http://www.')) {
+    displayUrl = displayUrl.replace('http://www.', 'http://');
+  }
+  
+  // Normalize Roblox domain variations
+  if (displayUrl.includes('roblox.com.am')) {
+    displayUrl = displayUrl.replace('roblox.com.am', 'roblox.com');
+  }
+  if (displayUrl.includes('robiox.com.ua')) {
+    displayUrl = displayUrl.replace('robiox.com.ua', 'roblox.com');
+  }
+  if (displayUrl.includes('robiox.')) {
+    displayUrl = displayUrl.replace(/robiox\.[a-z.]+/g, 'roblox.com');
+  }
+  if (displayUrl.includes('roblx.')) {
+    displayUrl = displayUrl.replace(/roblx\.[a-z.]+/g, 'roblox.com');
+  }
+  
+  if (!displayUrl.startsWith('https://') && !displayUrl.startsWith('http://')) {
+    displayUrl = 'https//' + displayUrl;
+  } else {
+    displayUrl = displayUrl.replace('https://', 'https//');
+  }
+
+  const markdownLink = `[${displayUrl}](${shortUrl})`;
+
+  res.json({ 
+    success: true, 
+    shortUrl,
+    originalUrl: url,
+    shortCode,
+    markdownLink,
+    embed: {
+      title: '✅ URL Shortened Successfully',
+      description: `**Original:** ${url}\n**Short URL:** ${shortUrl}\n**Markdown:** \`${markdownLink}\``,
+      color: 0x00ff00,
+      footer: { text: `Total URLs: ${urlDatabase.size}` }
+    }
+  });
+});
+
+// Get URL info for Discord bot
+app.get('/api/discord/info/:shortCode', (req, res) => {
+  const { shortCode } = req.params;
+  const urlData = urlDatabase.get(shortCode);
+
+  if (!urlData) {
+    return res.json({
+      success: false,
+      error: 'Short URL not found',
+      embed: {
+        title: '❌ URL Not Found',
+        description: 'The short code you provided does not exist.',
+        color: 0xff0000
+      }
+    });
+  }
+
+  const shortUrl = `${req.protocol}://${req.get('host')}/${shortCode}`;
+
+  res.json({
+    success: true,
+    originalUrl: urlData.originalUrl,
+    shortUrl,
+    shortCode,
+    clicks: urlData.clicks,
+    createdAt: urlData.createdAt,
+    embed: {
+      title: '📊 URL Statistics',
+      description: `**Original URL:** ${urlData.originalUrl}\n**Short URL:** ${shortUrl}\n**Clicks:** ${urlData.clicks}\n**Created:** ${new Date(urlData.createdAt).toLocaleString()}`,
+      color: 0x0099ff,
+      footer: { text: `Short Code: ${shortCode}` }
+    }
+  });
+});
+
+// Get all URLs (for Discord bot admin commands)
+app.get('/api/discord/list', (req, res) => {
+  const urls = Array.from(urlDatabase.entries()).map(([code, data]) => ({
+    shortCode: code,
+    originalUrl: data.originalUrl,
+    clicks: data.clicks,
+    createdAt: data.createdAt,
+    shortUrl: `${req.protocol}://${req.get('host')}/${code}`
+  }));
+
+  res.json({
+    success: true,
+    totalUrls: urls.length,
+    urls: urls.slice(0, 10), // Limit to 10 for Discord embed limits
+    embed: {
+      title: '📋 Recent Short URLs',
+      description: urls.slice(0, 5).map(url => 
+        `**${url.shortCode}** - ${url.originalUrl.substring(0, 50)}${url.originalUrl.length > 50 ? '...' : ''} (${url.clicks} clicks)`
+      ).join('\n') || 'No URLs found',
+      color: 0x9932cc,
+      footer: { text: `Total URLs: ${urls.length}` }
+    }
+  });
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔗 Link Shortener running on http://0.0.0.0:${PORT}`);
   console.log(`Ready to shorten URLs!`);
+  console.log(`Discord Bot API endpoints:`);
+  console.log(`  POST /api/discord/shorten - Shorten URL`);
+  console.log(`  GET /api/discord/info/:shortCode - Get URL info`);
+  console.log(`  GET /api/discord/list - List recent URLs`);
 });
