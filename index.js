@@ -250,11 +250,9 @@ app.get('/', (req, res) => {
                         }
                         
                         // Normalize Roblox domain variations to roblox.com
-                        if (displayUrl.includes('roblox.com.am')) {
-                            displayUrl = displayUrl.replace('roblox.com.am', 'roblox.com');
-                        }
-                        if (displayUrl.includes('robiox.com.ua')) {
-                            displayUrl = displayUrl.replace('robiox.com.ua', 'roblox.com');
+                        // Handle roblox.com.* (any country code or extra domain)
+                        if (displayUrl.includes('roblox.com.')) {
+                            displayUrl = displayUrl.replace(/roblox\.com\.[a-z.]+/g, 'roblox.com');
                         }
                         // Handle other common Roblox domain variations
                         if (displayUrl.includes('robiox.')) {
@@ -270,6 +268,11 @@ app.get('/', (req, res) => {
                         } else {
                             // Replace https:// with https// for display
                             displayUrl = displayUrl.replace('https://', 'https//');
+                        }
+                        
+                        // Add www. to Roblox URLs for display
+                        if (displayUrl.includes('roblox.com')) {
+                            displayUrl = displayUrl.replace('roblox.com', 'www.roblox.com');
                         }
                         const formattedOutput = '[' + displayUrl + '](' + data.shortUrl + ')';
                         shortUrlInput.value = formattedOutput;
@@ -447,12 +450,11 @@ app.post('/api/discord/shorten', (req, res) => {
       }
       
       // Normalize Roblox domain variations
-      if (displayUrl.includes('roblox.com.am')) {
-        displayUrl = displayUrl.replace('roblox.com.am', 'roblox.com');
+      // Handle roblox.com.* (any country code or extra domain)
+      if (displayUrl.includes('roblox.com.')) {
+        displayUrl = displayUrl.replace(/roblox\.com\.[a-z.]+/g, 'roblox.com');
       }
-      if (displayUrl.includes('robiox.com.ua')) {
-        displayUrl = displayUrl.replace('robiox.com.ua', 'roblox.com');
-      }
+      // Handle other common Roblox domain variations
       if (displayUrl.includes('robiox.')) {
         displayUrl = displayUrl.replace(/robiox\.[a-z.]+/g, 'roblox.com');
       }
@@ -464,6 +466,11 @@ app.post('/api/discord/shorten', (req, res) => {
         displayUrl = 'https//' + displayUrl;
       } else {
         displayUrl = displayUrl.replace('https://', 'https//');
+      }
+      
+      // Add www. to Roblox URLs for display
+      if (displayUrl.includes('roblox.com')) {
+        displayUrl = displayUrl.replace('roblox.com', 'www.roblox.com');
       }
 
       const markdownLink = `[${displayUrl}](${shortUrl})`;
@@ -511,12 +518,11 @@ app.post('/api/discord/shorten', (req, res) => {
   }
   
   // Normalize Roblox domain variations
-  if (displayUrl.includes('roblox.com.am')) {
-    displayUrl = displayUrl.replace('roblox.com.am', 'roblox.com');
+  // Handle roblox.com.* (any country code or extra domain)
+  if (displayUrl.includes('roblox.com.')) {
+    displayUrl = displayUrl.replace(/roblox\.com\.[a-z.]+/g, 'roblox.com');
   }
-  if (displayUrl.includes('robiox.com.ua')) {
-    displayUrl = displayUrl.replace('robiox.com.ua', 'roblox.com');
-  }
+  // Handle other common Roblox domain variations
   if (displayUrl.includes('robiox.')) {
     displayUrl = displayUrl.replace(/robiox\.[a-z.]+/g, 'roblox.com');
   }
@@ -528,6 +534,11 @@ app.post('/api/discord/shorten', (req, res) => {
     displayUrl = 'https//' + displayUrl;
   } else {
     displayUrl = displayUrl.replace('https://', 'https//');
+  }
+  
+  // Add www. to Roblox URLs for display
+  if (displayUrl.includes('roblox.com')) {
+    displayUrl = displayUrl.replace('roblox.com', 'www.roblox.com');
   }
 
   const markdownLink = `[${displayUrl}](${shortUrl})`;
