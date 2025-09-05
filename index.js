@@ -317,21 +317,10 @@ app.post('/shorten', (req, res) => {
     return res.json({ success: false, error: 'Please provide a valid URL' });
   }
 
-  // Check if URL already exists
-  for (const [code, data] of urlDatabase.entries()) {
-    if (data.originalUrl === url) {
-      return res.json({ 
-        success: true, 
-        shortUrl: `${req.protocol}://${req.get('host')}/${code}`,
-        totalUrls: urlDatabase.size
-      });
-    }
-  }
-
-  // Generate new short code
+  // Generate new short code (always create unique)
   let shortCode = generateShortCode();
 
-  // Ensure uniqueness
+  // Ensure uniqueness of short code
   while (urlDatabase.has(shortCode)) {
     shortCode = generateShortCode();
   }
@@ -432,65 +421,7 @@ app.post('/api/discord/shorten', (req, res) => {
     });
   }
 
-  // Check if URL already exists
-  for (const [code, data] of urlDatabase.entries()) {
-    if (data.originalUrl === url) {
-      const shortUrl = `${req.protocol}://${req.get('host')}/${code}`;
-      
-      // Format display URL for Discord
-      let displayUrl = url;
-      if (displayUrl.startsWith('www.')) {
-        displayUrl = displayUrl.substring(4);
-      }
-      if (displayUrl.startsWith('https://www.')) {
-        displayUrl = displayUrl.replace('https://www.', 'https://');
-      }
-      if (displayUrl.startsWith('http://www.')) {
-        displayUrl = displayUrl.replace('http://www.', 'http://');
-      }
-      
-      // Normalize Roblox domain variations
-      // Handle roblox.com.* (any country code or extra domain)
-      if (displayUrl.includes('roblox.com.')) {
-        displayUrl = displayUrl.replace(/roblox\.com\.[a-z.]+/g, 'roblox.com');
-      }
-      // Handle other common Roblox domain variations
-      if (displayUrl.includes('robiox.')) {
-        displayUrl = displayUrl.replace(/robiox\.[a-z.]+/g, 'roblox.com');
-      }
-      if (displayUrl.includes('roblx.')) {
-        displayUrl = displayUrl.replace(/roblx\.[a-z.]+/g, 'roblox.com');
-      }
-      
-      if (!displayUrl.startsWith('https://') && !displayUrl.startsWith('http://')) {
-        displayUrl = 'https//' + displayUrl;
-      } else {
-        displayUrl = displayUrl.replace('https://', 'https//');
-      }
-      
-      // Add www. to Roblox URLs for display
-      if (displayUrl.includes('roblox.com')) {
-        displayUrl = displayUrl.replace('roblox.com', 'www.roblox.com');
-      }
-
-      const markdownLink = `[${displayUrl}](${shortUrl})`;
-
-      return res.json({ 
-        success: true, 
-        shortUrl,
-        originalUrl: url,
-        markdownLink,
-        embed: {
-          title: '🔗 URL Already Shortened',
-          description: `**Original:** ${url}\n**Short URL:** ${shortUrl}\n**Markdown:** \`${markdownLink}\``,
-          color: 0x00ff00,
-          footer: { text: `Total URLs: ${urlDatabase.size}` }
-        }
-      });
-    }
-  }
-
-  // Generate new short code
+  // Generate new short code (always create unique)
   let shortCode = generateShortCode();
   while (urlDatabase.has(shortCode)) {
     shortCode = generateShortCode();
